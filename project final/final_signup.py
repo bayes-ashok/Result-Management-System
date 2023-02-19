@@ -13,7 +13,7 @@ project.attributes("-fullscreen",True)
 #creating title bar
 a=Frame(project,width=1550,height=35,bg="#57a1f8").place(x=0,y=0)
 title=Label(a, text="AccuResult",font=("Comic Sans MS",15,"bold"), bg="#57a1f8").place(x=36,y=0)
-img=Image.open(r"C:\Users\rujan\ezzzz\grpprjt\logo.png") #image logo
+img=Image.open(r"C:\Users\LENOVO\Documents\python_learning\sem_class\tkinter\logo.png") #image logo
 img=img.resize((30,30))
 new_logo=ImageTk.PhotoImage(img)
 image=Label(image=new_logo,border=0,bg="#57a1f8").place(x=5,y=3)
@@ -237,53 +237,62 @@ def signin():
     phonenumber=phone_number.get()
     password=code1.get()
     confirmpassword=code.get()
-    check=list(range(1,50))
+    check=range(1,20)
     global img
-    
     if  Firstname=="First  Name" or Lastname=="Last  Name" or teacherid=="Teacher Id" or phone_number=="Phone Number" or emails=="Enter Your Email" or password=="Create Password" or confirmpassword=="Confirm Password"   :
         messagebox.showinfo("Error","Please fill all the form")
-    elif password!=confirmpassword:
-        messagebox.showerror("Error","Password do not match")
     elif teacherid.isdigit()==False:
         messagebox.showerror("Error","Enter a Number(Teacher ID)")
-    elif teacherid not in check:
+    elif int(teacherid) not in check:
         messagebox.showerror("Error","Enter a Valid Teacher ID")
-    elif "@" not in emails or emails.endswith(".com")==False:
-        messagebox.showerror("Error","Enter a Valid Email")
     elif phonenumber.isdigit()==False:
         messagebox.showerror("Error","Enter a Number(Phone Number)")
     elif len(phonenumber)!=10:
         messagebox.showerror("Error","Enter a Valid Phone Number")
+    elif "@" not in emails or emails.endswith(".com")==False:
+        messagebox.showerror("Error","Enter a Valid Email")
+    elif password!=confirmpassword:
+        messagebox.showerror("Error","Password do not match")
     else:
+        messagebox.showinfo("Message","Your ID has been created.")
+        ruj=sqlite3.connect("signup.db")
+        r=ruj.cursor()
+
+        r.execute("""CREATE TABLE IF NOT EXISTS sign (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name TEXT NOT NULL,
+            last_name TEXT NOT NULL,
+            teacher_id TEXT NOT NULL,
+            phone_number TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            confirm_password TEXT NOT NULL
+        )""")
+
+        try:
+            r.execute("""
+                    INSERT INTO sign (first_name, last_name, teacher_id, phone_number, email, password, confirm_password)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (Firstname, Lastname, teacherid, phonenumber, emails, password, confirmpassword))
+            ruj.commit()
+            ruj.close()
+        except Exception as e:
+            messagebox.showerror("Error",e)
+            
         project.destroy()
         runpy.run_path(
             "final_login.py")
-    ruj=sqlite3.connect("signup.db")
-    r=ruj.cursor()
+        
 
-    r.execute("""CREATE TABLE IF NOT EXISTS sign (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        teacher_id TEXT NOT NULL,
-        phone_number TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        confirm_password TEXT NOT NULL
-    )""")
 
-    r.execute("""
-                INSERT INTO sign (first_name, last_name, teacher_id, phone_number, email, password, confirm_password)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (Firstname, Lastname, teacherid, phonenumber, emails, password, confirmpassword))
-
-    ruj.commit()
-    ruj.close()
+   
+        
 d=Button(frame,width=15,pady=3,text="Next  ➔",bg="#57a1f8",fg="white",border=0,font=buttonFont1,activebackground="#57a1f8",activeforeground="white",command=signin)
 d.place(x=235,y=475)
 d.bind('<Enter>',o1_enter)
 d.bind('<Leave>',o1_leave)
 
 project.mainloop()
+
 
 
